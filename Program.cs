@@ -1,12 +1,41 @@
 
-using System.Net.Sockets;
+using aurastrip_adapter.Contexts;
+using aurastrip_adapter.Controllers;
+using aurastrip_adapter.Repositories.Column;
+using aurastrip_adapter.Repositories.Configuration;
+using aurastrip_adapter.Repositories.Slot;
+using aurastrip_adapter.Repositories.Strip;
+using aurastrip_adapter.Services;
+using aurastrip_adapter.Services.Repositories.Configuration;
+using aurastrip_adapter.WebSockets;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddDbContext<ConfigurationDbContext>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Services
+builder.Services.AddScoped<ConfigurationService>();
+builder.Services.AddScoped<ColumnService>();
+builder.Services.AddScoped<SlotService>();
+builder.Services.AddScoped<StripService>();
+
+// Repositories
+builder.Services.AddScoped<IConfigurationRepository, LocalConfigurationRespository>();
+builder.Services.AddScoped<IColumnRepository, LocalColumnRepository>();
+builder.Services.AddScoped<ISlotRepository, LocalSlotRepository>();
+builder.Services.AddScoped<IStripRepository, LocalStripRepository>();
+
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<ConfigurationDbContext>();
+    dbContext.Database.EnsureCreated();
+    dbContext.Database.Migrate();
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -15,43 +44,13 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+app.MapGroup("/configurations")
+    .MapConfigurationEndpoints();
+app.MapGroup("/columns")
+    .MapColumnEndpoints();
+app.MapGroup("/strips")
+    .MapStripEndpoints();
 
-
-var auroraTcp = new TcpClient();
-var server = new Fleck.WebSocketServer("ws://0.0.0.0:6969");
-server.Start(config =>
-{
-    config.OnOpen = () =>
-    {
-        Console.WriteLine("Connexion ouverte");
-    };
-    config.OnOpen = () =>
-    {
-        Console.WriteLine("Connexion fermée");
-    };
-    config.OnMessage = (data) =>
-    {
-        lock (auroraTcp)
-        {
-            if (auroraTcp.Connected is false)
-            {
-                auroraTcp.Connect("127.0.0.1", 1130);
-                if (auroraTcp.Connected is false)
-                {
-                    config.Send(System.Text.Encoding.ASCII.GetBytes("#NO_AURORA#"));
-                    return;
-                }
-            }
-
-            var dataBytes = System.Text.Encoding.ASCII.GetBytes(data.Trim() + Environment.NewLine);
-            auroraTcp.GetStream().Write(dataBytes, 0, dataBytes.Length);
-
-            var streamReader = new StreamReader(auroraTcp.GetStream(), System.Text.Encoding.ASCII);
-            var response = streamReader.ReadLine();
-            config.Send(response);
-        }
-    };
-});
+WebSocketRelayServer.Start();
 
 app.Run();
