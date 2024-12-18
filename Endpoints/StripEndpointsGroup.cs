@@ -12,6 +12,7 @@ namespace aurastrip_adapter.Controllers
         {
             group.MapGet("/", GetAll);
             group.MapGet("/{id}", GetById);
+            group.MapPost("/", SetStrip);
 
             return group;
         }
@@ -30,6 +31,11 @@ namespace aurastrip_adapter.Controllers
             }
 
             return Results.Ok(strip);
+        }
+
+        public static async Task<IResult> SetStrip(Strip strip, StripService service, CancellationToken cancellation)
+        {
+            return Results.Ok(await service.SetStripAsync(strip, cancellation));
         }
     }
 }

@@ -1,6 +1,7 @@
 
 using aurastrip_adapter.Contexts;
 using aurastrip_adapter.Controllers;
+using aurastrip_adapter.Endpoints;
 using aurastrip_adapter.Repositories.Column;
 using aurastrip_adapter.Repositories.Configuration;
 using aurastrip_adapter.Repositories.Slot;
@@ -34,7 +35,7 @@ using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<ConfigurationDbContext>();
     dbContext.Database.EnsureCreated();
-    dbContext.Database.Migrate();
+    //dbContext.Database.Migrate();
 }
 
 // Configure the HTTP request pipeline.
@@ -48,6 +49,8 @@ app.MapGroup("/configurations")
     .MapConfigurationEndpoints();
 app.MapGroup("/columns")
     .MapColumnEndpoints();
+app.MapGroup("slots")
+    .MapSlotEndpoints();
 app.MapGroup("/strips")
     .MapStripEndpoints();
 
