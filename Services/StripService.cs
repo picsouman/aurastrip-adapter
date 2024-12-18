@@ -18,6 +18,9 @@ namespace aurastrip_adapter.Services
         public Strip? GetById(Guid id)
             => repository.GetById(id);
 
+        public IEnumerable<Strip> GetAllForSlotId(Guid slotId)
+            => repository.GetAllAssignedToSlot(slotId);
+
         public async Task<Strip> SetStripAsync(Strip model, CancellationToken cancellation)
         {
             var strip = repository.GetById(model.Id);
