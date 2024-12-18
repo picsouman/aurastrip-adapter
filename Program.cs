@@ -1,4 +1,3 @@
-
 using aurastrip_adapter.Contexts;
 using aurastrip_adapter.Controllers;
 using aurastrip_adapter.Endpoints;
@@ -9,7 +8,6 @@ using aurastrip_adapter.Repositories.Strip;
 using aurastrip_adapter.Services;
 using aurastrip_adapter.Services.Repositories.Configuration;
 using aurastrip_adapter.WebSockets;
-using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -46,12 +44,19 @@ if (app.Environment.IsDevelopment())
 }
 
 app.MapGroup("/configurations")
+    .WithTags("Configurations")
     .MapConfigurationEndpoints();
+
 app.MapGroup("/columns")
+    .WithTags("Columns")
     .MapColumnEndpoints();
+
 app.MapGroup("slots")
+    .WithTags("Slots")
     .MapSlotEndpoints();
+
 app.MapGroup("/strips")
+    .WithTags("Strips")
     .MapStripEndpoints();
 
 WebSocketRelayServer.Start();

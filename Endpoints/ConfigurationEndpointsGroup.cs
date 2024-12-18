@@ -29,10 +29,10 @@ namespace aurastrip_adapter.Controllers
         private static IResult GetSlotsForColumn(Guid configurationId, ColumnService service)
             => Results.Ok(service.GetAllForConfigurationId(configurationId));
 
-        public static IResult GetAll(SlotService service)
+        public static IResult GetAll(ConfigurationService service)
             => Results.Ok(service.GetAll());
 
-        public static IResult GetById(Guid id, SlotService service)
+        public static IResult GetById(Guid id, ConfigurationService service)
         {
             var strip = service.GetById(id);
             if (strip is null)
