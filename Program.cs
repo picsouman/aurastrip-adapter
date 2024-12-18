@@ -8,6 +8,7 @@ using aurastrip_adapter.Repositories.Strip;
 using aurastrip_adapter.Services;
 using aurastrip_adapter.Services.Repositories.Configuration;
 using aurastrip_adapter.WebSockets;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,8 +33,7 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<ConfigurationDbContext>();
-    dbContext.Database.EnsureCreated();
-    //dbContext.Database.Migrate();
+    dbContext.Database.Migrate();
 }
 
 // Configure the HTTP request pipeline.
