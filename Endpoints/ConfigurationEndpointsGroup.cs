@@ -1,6 +1,5 @@
 ﻿using aurastrip_adapter.Models;
 using aurastrip_adapter.Services;
-using System.Runtime.CompilerServices;
 
 namespace aurastrip_adapter.Controllers
 {

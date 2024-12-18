@@ -1,6 +1,5 @@
 ﻿using aurastrip_adapter.Models;
 using aurastrip_adapter.Services;
-using System.Reflection.Metadata.Ecma335;
 
 namespace aurastrip_adapter.Endpoints
 {

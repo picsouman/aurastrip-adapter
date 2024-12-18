@@ -1,5 +1,4 @@
-﻿
-using aurastrip_adapter.Contexts;
+﻿using aurastrip_adapter.Contexts;
 using Microsoft.EntityFrameworkCore;
 
 namespace aurastrip_adapter.Repositories.Slot

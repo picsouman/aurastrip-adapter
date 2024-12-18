@@ -1,6 +1,5 @@
 ﻿using aurastrip_adapter.Models;
 using aurastrip_adapter.Repositories.Slot;
-using aurastrip_adapter.Repositories.Strip;
 
 namespace aurastrip_adapter.Services
 {

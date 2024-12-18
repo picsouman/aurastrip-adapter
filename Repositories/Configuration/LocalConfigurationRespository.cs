@@ -1,6 +1,4 @@
 ﻿using aurastrip_adapter.Contexts;
-using aurastrip_adapter.Models;
-using aurastrip_adapter.Repositories;
 using aurastrip_adapter.Repositories.Configuration;
 using Microsoft.EntityFrameworkCore;
 

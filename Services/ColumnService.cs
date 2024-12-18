@@ -1,7 +1,5 @@
 ﻿using aurastrip_adapter.Models;
 using aurastrip_adapter.Repositories.Column;
-using aurastrip_adapter.Repositories.Slot;
-using Column = aurastrip_adapter.Models.Column;
 
 namespace aurastrip_adapter.Services
 {
