@@ -1,43 +1,49 @@
-﻿using aurastrip_adapter.Models;
+﻿using aurastrip_adapter.Contexts;
+using aurastrip_adapter.Models;
+using aurastrip_adapter.Repositories;
 using aurastrip_adapter.Repositories.Configuration;
+using Microsoft.EntityFrameworkCore;
 
 namespace aurastrip_adapter.Services.Repositories.Configuration
 {
     public class LocalConfigurationRespository : IConfigurationRepository
     {
-        public void Create(Strip model)
+        private readonly ConfigurationDbContext context;
+
+        public LocalConfigurationRespository(ConfigurationDbContext context)
         {
-            throw new NotImplementedException();
+            this.context = context;
+        }
+
+        public Models.Configuration? GetById(Guid id)
+            => context.Configurations.FirstOrDefault(configuration => configuration.Id == id);
+
+        public IEnumerable<Models.Configuration> GetAll()
+            => context.Configurations.AsEnumerable();
+
+        public void Create(Models.Configuration model)
+            => context.Configurations.Add(model);
+
+        public void Update(Models.Configuration model)
+        {
+            context.Entry(model).State = EntityState.Modified;
         }
 
         public void Delete(Guid id)
         {
-            throw new NotImplementedException();
-        }
+            var configuration = context.Configurations.FirstOrDefault(context => context.Id == id);
+            if (configuration is null)
+            {
+                return;
+            }
 
-        public IEnumerable<Strip> GetAll()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Strip? GetById(Guid id)
-        {
-            throw new NotImplementedException();
+            context.Configurations.Remove(configuration);
         }
 
         public void Save()
-        {
-            throw new NotImplementedException();
-        }
+            => context.SaveChanges();
 
-        public Task SaveAsync(CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Update(Strip model)
-        {
-            throw new NotImplementedException();
-        }
+        public async Task SaveAsync(CancellationToken cancellationToken)
+            => await context.SaveChangesAsync(cancellationToken);
     }
 }

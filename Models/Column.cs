@@ -7,5 +7,6 @@ namespace aurastrip_adapter.Models
         [Key]
         public Guid Id { get; set; }
         public int Index { get; set; }
+        public Guid ConfigurationId { get; set; }
     }
 }

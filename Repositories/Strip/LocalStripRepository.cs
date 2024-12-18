@@ -45,7 +45,7 @@ namespace aurastrip_adapter.Repositories.Strip
             context.Strips.Remove(strip);
         }
 
-        public void DeleteAllAssignToSlot(Guid slotId)
+        public void DeleteAllAssignedToSlot(Guid slotId)
         {
             var strips = context.Strips.Where(context => context.SlotId == slotId);
             context.Strips.RemoveRange(strips);

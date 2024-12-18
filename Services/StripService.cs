@@ -44,5 +44,11 @@ namespace aurastrip_adapter.Services
             repository.Delete(id);
             await repository.SaveAsync(cancellationToken);
         }
+
+        public async Task DeleteAllAssignedToSlotAsync(Guid slotId, CancellationToken cancellationToken = default)
+        {
+            repository.DeleteAllAssignedToSlot(slotId);
+            await repository.SaveAsync(cancellationToken);
+        }
     }
 }

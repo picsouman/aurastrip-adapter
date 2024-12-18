@@ -1,8 +1,5 @@
-﻿using aurastrip_adapter.Contexts;
-using aurastrip_adapter.Models;
+﻿using aurastrip_adapter.Models;
 using aurastrip_adapter.Services;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
 
 namespace aurastrip_adapter.Controllers
 {
