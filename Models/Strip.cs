@@ -8,6 +8,7 @@ namespace aurastrip_adapter.Models
         public Guid Id { get; set; }
         public string Callsign { get; set; } = string.Empty;
         public Guid SlotId {  get; set; }
+        public int Index { get; set; }
         public string Language { get; set; } = string.Empty;
         public string Comment { get; set; } = string.Empty;
         public string Gate { get; set; } = string.Empty;
