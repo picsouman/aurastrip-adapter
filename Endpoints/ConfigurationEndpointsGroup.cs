@@ -17,7 +17,43 @@ namespace aurastrip_adapter.Controllers
             columnGroup.MapGet("/", GetSlotsForColumn);
             columnGroup.MapDelete("/", DeleteSlotsForColumn);
 
+            var stripGroup = group.MapGroup("{configurationId}/strips");
+            stripGroup.MapGet("/", GetStripsForConfiguration);
+
             return group;
+        }
+
+        private static IResult GetStripsForConfiguration(
+            Guid configurationId,
+            StripService stripService,
+            SlotService slotService,
+            ColumnService columnService)
+        {
+            var columnsIds = columnService
+                .GetAllForConfigurationId(configurationId)
+                .Select(column => column.Id)
+                .ToArray();
+
+            if(columnsIds.Length == 0)
+            {
+                return Results.Ok(Enumerable.Empty<Strip>());
+            }
+
+            var slotsIds = slotService
+                .GetAll()
+                .Where(slot => columnsIds.Contains(slot.Id))
+                .Select(slot => slot.Id)
+                .ToArray();
+
+            if (slotsIds.Length == 0)
+            {
+                return Results.Ok(Enumerable.Empty<Strip>());
+            }
+
+            var strips = stripService.GetAll()
+                .Where(strip => slotsIds.Contains(strip.SlotId));
+
+            return Results.Ok(strips);
         }
 
         private static async Task<IResult> DeleteSlotsForColumn(Guid configurationId, ColumnService service)
