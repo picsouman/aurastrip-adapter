@@ -16,6 +16,16 @@ builder.Services.AddDbContext<ConfigurationDbContext>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddCors(setup =>
+{
+    setup.AddDefaultPolicy(policy =>
+    {
+        policy.AllowAnyHeader();
+        policy.AllowAnyOrigin();
+        policy.AllowAnyMethod();
+    });
+});
+
 // Services
 builder.Services.AddScoped<ConfigurationService>();
 builder.Services.AddScoped<ColumnService>();
@@ -42,6 +52,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseCors();
 
 app.MapGroup("/configurations")
     .WithTags("Configurations")
