@@ -18,6 +18,9 @@ namespace aurastrip_adapter.Services
         public Strip? GetById(Guid id)
             => repository.GetById(id);
 
+        public IEnumerable<Strip> GetAllForConfigurationId(Guid configurationId)
+            => repository.GetAllAssignedToConfiguration(configurationId);
+
         public IEnumerable<Strip> GetAllForSlotId(Guid slotId)
             => repository.GetAllAssignedToSlot(slotId);
 

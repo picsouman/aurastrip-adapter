@@ -24,6 +24,9 @@ namespace aurastrip_adapter.Repositories.Strip
         public IEnumerable<Models.Strip> GetAllAssignedToSlot(Guid slotId)
             => context.Strips.Where(strip => strip.SlotId.Equals(slotId));
 
+        public IEnumerable<Models.Strip> GetAllAssignedToConfiguration(Guid configurationId)
+            => context.Strips.Where(strip => strip.ConfigurationId.Equals(configurationId));
+
         public void Create(Models.Strip model)
         {
             context.Strips.Add(model);

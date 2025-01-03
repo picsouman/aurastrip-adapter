@@ -23,39 +23,6 @@ namespace aurastrip_adapter.Controllers
             return group;
         }
 
-        private static IResult GetStripsForConfiguration(
-            Guid configurationId,
-            StripService stripService,
-            SlotService slotService,
-            ColumnService columnService)
-        {
-            var columnsIds = columnService
-                .GetAllForConfigurationId(configurationId)
-                .Select(column => column.Id)
-                .ToArray();
-
-            if(columnsIds.Length == 0)
-            {
-                return Results.Ok(Enumerable.Empty<Strip>());
-            }
-
-            var slotsIds = slotService
-                .GetAll()
-                .Where(slot => columnsIds.Contains(slot.Id))
-                .Select(slot => slot.Id)
-                .ToArray();
-
-            if (slotsIds.Length == 0)
-            {
-                return Results.Ok(Enumerable.Empty<Strip>());
-            }
-
-            var strips = stripService.GetAll()
-                .Where(strip => slotsIds.Contains(strip.SlotId));
-
-            return Results.Ok(strips);
-        }
-
         private static async Task<IResult> DeleteSlotsForColumn(Guid configurationId, ColumnService service)
         {
             await service.DeleteAllAssignedToConfigurationAsync(configurationId);
@@ -63,6 +30,9 @@ namespace aurastrip_adapter.Controllers
         }
 
         private static IResult GetSlotsForColumn(Guid configurationId, ColumnService service)
+            => Results.Ok(service.GetAllForConfigurationId(configurationId));
+
+        private static IResult GetStripsForConfiguration(Guid configurationId, StripService service)
             => Results.Ok(service.GetAllForConfigurationId(configurationId));
 
         public static IResult GetAll(ConfigurationService service)

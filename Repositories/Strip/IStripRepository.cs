@@ -6,6 +6,7 @@ namespace aurastrip_adapter.Repositories.Strip
     {
         Models.Strip? GetBySlotAndCallsign(Guid slotId, string callsign);
         IEnumerable<Models.Strip> GetAllAssignedToSlot(Guid slotId);
+        IEnumerable<Models.Strip> GetAllAssignedToConfiguration(Guid slotId);
 
         void DeleteAllAssignedToSlot(Guid slotId);
     }
