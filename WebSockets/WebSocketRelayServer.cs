@@ -1,44 +1,87 @@
-﻿using Fleck;
-using System.Net.Sockets;
+﻿using aurastrip_adapter.WebSockets.Commands;
+using Fleck;
+using MediatR;
+using System.Text.Json;
 
 namespace aurastrip_adapter.WebSockets
 {
+    public record WebSocketRequest(string RequestId, string Method, object Data)
+    {
+        public T GetData<T>()
+        {
+            if (Data is T directCast)
+            {
+                return directCast;
+            }
+
+            if (Data is JsonElement jsonElement)
+            {
+                return jsonElement.Deserialize<T>() ?? throw new FormatException("The given data given as parameter is not compatible with the method");
+            }
+
+            var json = JsonSerializer.Serialize(Data);
+            return JsonSerializer.Deserialize<T>(json) ?? throw new FormatException("The given data given as parameter is not compatible with the method");
+        }
+    }
+
+    public record WebSocketResponse(string RequestId, string ReturnCode, object Data);
+
     public static class WebSocketRelayServer
     {
-        private static TcpClient auroraTcp = new TcpClient();
+        private static IMediator _mediator = null!;
 
-        public static void Start()
+        public static void Start(IMediator mediator)
         {
-            var server = new Fleck.WebSocketServer("ws://0.0.0.0:6969");
+            _mediator = mediator;
+            var server = new WebSocketServer("ws://0.0.0.0:6969");
             server.Start(config =>
             {
-                config.OnOpen = () => Console.WriteLine("Connexion ouverte");
+                config.OnOpen = () => Console.WriteLine("Connexion ouverte" + config.ConnectionInfo.ClientIpAddress);
                 config.OnClose = () => Console.WriteLine("Connexion fermée");
                 config.OnMessage = (data) => OnMessageHandler(config, data);
             });
         }
 
-        private static void OnMessageHandler(IWebSocketConnection config, string data)
+        private async static void OnMessageHandler(IWebSocketConnection config, string data)
         {
-            lock (auroraTcp)
+            var request = JsonSerializer.Deserialize<WebSocketRequest>(data)!;
+            WebSocketResponse? response = null;
+
+            try
             {
-                if (auroraTcp.Connected is false)
-                {
-                    auroraTcp.Connect("127.0.0.1", 1130);
-                    if (auroraTcp.Connected is false)
+                response = new WebSocketResponse(
+                    RequestId: request.RequestId,
+                    ReturnCode: "OK",
+                    Data: request.Method switch
                     {
-                        config.Send(System.Text.Encoding.ASCII.GetBytes("#NO_AURORA#"));
-                        return;
+                        "GETALL_POS" => await _mediator.Send(new GetAllPositionCommand()),
+                        "GETALL_FP" => await _mediator.Send(new GetAllFlightPlanCommand()),
+                        "ASSUME" => await _mediator.Send(new AssumeCommand(request.Data.ToString() ?? string.Empty)),
+                        "RELEASE" => await _mediator.Send(new ReleaseCommand(request.Data.ToString() ?? string.Empty)),
+                        "TRANSFERT" => await _mediator.Send(request.GetData<TransfertCommand>()),
+                        "SET_TRAFFIC" => await _mediator.Send(request.GetData<SetTrafficCommand>()),
+                        _ => throw new NotImplementedException()
                     }
-                }
-
-                var dataBytes = System.Text.Encoding.ASCII.GetBytes(data.Trim() + Environment.NewLine);
-                auroraTcp.GetStream().Write(dataBytes, 0, dataBytes.Length);
-
-                var streamReader = new StreamReader(auroraTcp.GetStream(), System.Text.Encoding.ASCII);
-                var response = streamReader.ReadLine();
-                config.Send(response);
+                );
             }
+            catch(NotImplementedException)
+            {
+                response = new WebSocketResponse(
+                    RequestId: request!.RequestId,
+                    ReturnCode: "NOT_IMPLEMENTED",
+                    Data: "The command does not exists"
+                );
+            }
+            catch (Exception)
+            {
+                response = new WebSocketResponse(
+                    RequestId: request!.RequestId,
+                    ReturnCode: "NO_AURORA",
+                    Data: "Aurora not available"
+                );
+            }
+
+            await config.Send(JsonSerializer.Serialize(response));
         }
     }
 }
