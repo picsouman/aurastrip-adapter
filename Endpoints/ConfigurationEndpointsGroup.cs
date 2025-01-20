@@ -1,4 +1,5 @@
-﻿using aurastrip_adapter.Models;
+﻿using aurastrip_adapter.Endpoints.Dtos;
+using aurastrip_adapter.Models;
 using aurastrip_adapter.Services;
 
 namespace aurastrip_adapter.Controllers
@@ -12,6 +13,7 @@ namespace aurastrip_adapter.Controllers
             group.MapPost("/", Create);
             group.MapPut("/", Update);
             group.MapDelete("/{id}", DeleteStrip);
+            group.MapGet("/{id}/full", GetByIdFullConfiguration);
 
             var columnGroup = group.MapGroup("{configurationId}/columns");
             columnGroup.MapGet("/", GetSlotsForColumn);
@@ -40,13 +42,57 @@ namespace aurastrip_adapter.Controllers
 
         public static IResult GetById(Guid id, ConfigurationService service)
         {
-            var strip = service.GetById(id);
-            if (strip is null)
+            var configuration = service.GetById(id);
+            if (configuration is null)
             {
                 return Results.NotFound();
             }
 
-            return Results.Ok(strip);
+            return Results.Ok(configuration);
+        }
+
+        private static IResult GetByIdFullConfiguration(
+            Guid id,
+            ConfigurationService configurationService,
+            ColumnService columnService,
+            SlotService slotService)
+        {
+            var configuration = configurationService.GetById(id);
+            if (configuration is null)
+            {
+                return Results.NotFound();
+            }
+
+            var result = new ConfigurationFullDto()
+            {
+                Id = configuration.Id,
+                Name = configuration.Name,
+                CreationUtc = configuration.CreationUtc,
+                Columns = columnService
+                    .GetAllForConfigurationId(id)
+                    .Select(column => new ColumnFullDto()
+                    {
+                        Id = column.Id,
+                        Index = column.Index,
+                        Slots = slotService
+                            .GetAllForColumnId(column.Id)
+                            .Select(slot => new SlotFullDto()
+                            {
+                                Id = slot.Id,
+                                Index = slot.Index,
+                                Name = slot.Name,
+                                SizePercentage = slot.SizePercentage,
+                                Type = slot.Type,
+                                Data = slot.Data
+                            })
+                            .ToArray(),
+                    })
+                    .ToArray(),
+            };
+
+            var columns = columnService.GetAllForConfigurationId(id);
+
+            return Results.Ok(result);
         }
 
         public static async Task<IResult> Create(Configuration configuration, ConfigurationService service, CancellationToken cancellation)
