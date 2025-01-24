@@ -22,19 +22,12 @@ namespace aurastrip_adapter.Services
         {
             if (_tcpClient.Connected) return;
 
-            try
-            {
-                _tcpClient.Dispose();
-                _tcpClient = new TcpClient();
+            _tcpClient.Dispose();
+            _tcpClient = new TcpClient();
 
-                await _tcpClient
-                    .ConnectAsync(_host, _port)
-                    .WaitAsync(TimeSpan.FromSeconds(2));
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            await _tcpClient
+                .ConnectAsync(_host, _port)
+                .WaitAsync(TimeSpan.FromSeconds(2));
         }
 
         public async Task<T> ExecuteTransaction<T>(Func<TcpClient, Task<T>> action)

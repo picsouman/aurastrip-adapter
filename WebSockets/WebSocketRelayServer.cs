@@ -2,6 +2,7 @@
 using Fleck;
 using MediatR;
 using System.Text.Json;
+using aurastrip_adapter.Exceptions;
 
 namespace aurastrip_adapter.WebSockets
 {
@@ -60,15 +61,15 @@ namespace aurastrip_adapter.WebSockets
                         "RELEASE" => await _mediator.Send(new ReleaseCommand(request.Data.ToString() ?? string.Empty)),
                         "TRANSFERT" => await _mediator.Send(request.GetData<TransfertCommand>()),
                         "SET_TRAFFIC" => await _mediator.Send(request.GetData<SetTrafficCommand>()),
-                        _ => throw new NotImplementedException()
+                        _ => throw new CommandUnknownException()
                     }
                 );
             }
-            catch(NotImplementedException)
+            catch(CommandUnknownException)
             {
                 response = new WebSocketResponse(
                     RequestId: request!.RequestId,
-                    ReturnCode: "NOT_IMPLEMENTED",
+                    ReturnCode: "COMMAND_UNKNOWN",
                     Data: "The command does not exists"
                 );
             }
