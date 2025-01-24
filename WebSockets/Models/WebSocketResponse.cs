@@ -1,0 +1,1 @@
+public record WebSocketResponse(string RequestId, string ReturnCode, object Data);

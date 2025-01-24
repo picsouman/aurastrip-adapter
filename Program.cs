@@ -37,6 +37,8 @@ builder.Services.AddMediatR(configuration =>
 {
     configuration.RegisterServicesFromAssembly(typeof(Program).Assembly);
 });
+builder.Services.AddSingleton<WebSocketRelayHostedService>();
+
 
 // Repositories
 builder.Services.AddScoped<IConfigurationRepository, LocalConfigurationRespository>();
@@ -50,6 +52,9 @@ using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<ConfigurationDbContext>();
     dbContext.Database.Migrate();
+    
+    var relayService = scope.ServiceProvider.GetRequiredService<WebSocketRelayHostedService>();
+    await relayService.StartAsync(CancellationToken.None);
 }
 
 // Configure the HTTP request pipeline.
@@ -76,7 +81,5 @@ app.MapGroup("slots")
 app.MapGroup("/strips")
     .WithTags("Strips")
     .MapStripEndpoints();
-
-WebSocketRelayServer.Start(app.Services.GetRequiredService<IMediator>());
 
 app.Run();
