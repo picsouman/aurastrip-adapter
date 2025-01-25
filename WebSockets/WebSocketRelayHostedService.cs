@@ -12,6 +12,7 @@ public class WebSocketRelayHostedService : IHostedService
     private readonly WebSocketServer _server;
     private readonly IMediator _mediator;
     private IWebSocketConnection? _currentConnection = null;
+    private CancellationTokenSource _cancellationTokenSourceForAutoSenders = new();
     
     public WebSocketRelayHostedService(IMediator mediator)
     {
@@ -46,6 +47,9 @@ public class WebSocketRelayHostedService : IHostedService
         }
 
         _currentConnection = socket;
+        _cancellationTokenSourceForAutoSenders = new CancellationTokenSource();
+        StartAutomaticPositionDataSender(_cancellationTokenSourceForAutoSenders.Token);
+        StartAutomaticFlightPlanDataSender(_cancellationTokenSourceForAutoSenders.Token);
         socket.OnMessage = (data) => OnMessageHandler(socket, data).RunSynchronously();
     }
 
@@ -53,6 +57,7 @@ public class WebSocketRelayHostedService : IHostedService
     {
         if (_currentConnection == socket)
         {
+            _cancellationTokenSourceForAutoSenders.Cancel();
             _currentConnection = null;
         }
     }
@@ -99,4 +104,39 @@ public class WebSocketRelayHostedService : IHostedService
         await config.Send(JsonSerializer.Serialize(response));
     }
 
+    private async Task StartAutomaticPositionDataSender(CancellationToken cts)
+    {
+        while (!cts.IsCancellationRequested)
+        {
+            try
+            {
+                var wsResponse = new WebSocketResponse(
+                    RequestId: String.Empty,
+                    ReturnCode: "AUTO_POS",
+                    Data: JsonSerializer.Serialize(await _mediator.Send(new GetAllPositionCommand()))
+                );
+                await _currentConnection!.Send(JsonSerializer.Serialize(wsResponse));
+                await Task.Delay(1000, cts);
+                
+            } catch(Exception) {}
+        }
+    }
+    
+    private async Task StartAutomaticFlightPlanDataSender(CancellationToken cts)
+    {
+        while (!cts.IsCancellationRequested)
+        {
+            try
+            {
+                var wsResponse = new WebSocketResponse(
+                    RequestId: String.Empty,
+                    ReturnCode: "AUTO_FP",
+                    Data: JsonSerializer.Serialize(await _mediator.Send(new GetAllFlightPlanCommand()))
+                );
+                await _currentConnection!.Send(JsonSerializer.Serialize(wsResponse));
+                await Task.Delay(15000, cts);
+                
+            } catch(Exception) {}
+        }
+    } 
 }

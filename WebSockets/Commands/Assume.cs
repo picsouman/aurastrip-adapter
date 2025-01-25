@@ -1,6 +1,5 @@
 ﻿using aurastrip_adapter.Services;
 using MediatR;
-using System.Runtime.CompilerServices;
 
 namespace aurastrip_adapter.WebSockets.Commands
 {
