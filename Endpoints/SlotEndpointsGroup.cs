@@ -9,8 +9,8 @@ namespace aurastrip_adapter.Endpoints
         {
             group.MapGet("/", GetAll);
             group.MapGet("/{id}", GetById);
-            group.MapPost("/", Create);
-            group.MapPut("/", Update);
+            group.MapPost("/", Update);
+            group.MapPut("/", Create);
             group.MapDelete("/{id}", DeleteStrip);
 
             var slotGroup = group.MapGroup("{slotId}/strips");
