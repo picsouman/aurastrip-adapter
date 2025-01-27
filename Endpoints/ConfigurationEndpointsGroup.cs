@@ -73,20 +73,20 @@ namespace aurastrip_adapter.Controllers
                     .Select(column => new ColumnFullDto()
                     {
                         Id = column.Id,
-                        Index = column.Index,
                         Slots = slotService
                             .GetAllForColumnId(column.Id)
                             .Select(slot => new SlotFullDto()
                             {
                                 Id = slot.Id,
-                                Index = slot.Index,
                                 Name = slot.Name,
                                 SizePercentage = slot.SizePercentage,
                                 Type = slot.Type,
                                 Data = slot.Data
                             })
+                            .OrderBy(slot => slot.Index)
                             .ToArray(),
                     })
+                    .OrderBy(column => column.Index)
                     .ToArray(),
             };
 
