@@ -1,3 +1,4 @@
+using System.Text.Json;
 using aurastrip_adapter.Contexts;
 using aurastrip_adapter.Controllers;
 using aurastrip_adapter.Endpoints;
@@ -39,6 +40,12 @@ builder.Services.AddMediatR(configuration =>
 });
 builder.Services.AddSingleton<WebSocketRelayHostedService>();
 
+builder.Services.AddSingleton(new JsonSerializerOptions
+{
+    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+    WriteIndented = true,
+    PropertyNameCaseInsensitive = true,
+});
 
 // Repositories
 builder.Services.AddScoped<IConfigurationRepository, LocalConfigurationRespository>();

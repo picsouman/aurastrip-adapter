@@ -11,12 +11,14 @@ public class WebSocketRelayHostedService : IHostedService
 {
     private readonly WebSocketServer _server;
     private readonly IMediator _mediator;
+    private readonly JsonSerializerOptions _jsonOptions;
     private IWebSocketConnection? _currentConnection = null;
     private CancellationTokenSource _cancellationTokenSourceForAutoSenders = new();
     
-    public WebSocketRelayHostedService(IMediator mediator)
+    public WebSocketRelayHostedService(IMediator mediator, JsonSerializerOptions jsonOptions)
     {
         _mediator = mediator;
+        _jsonOptions = jsonOptions;
         _server = new WebSocketServer("ws://0.0.0.0:6969");
     }
 
@@ -48,9 +50,9 @@ public class WebSocketRelayHostedService : IHostedService
 
         _currentConnection = socket;
         _cancellationTokenSourceForAutoSenders = new CancellationTokenSource();
-        StartAutomaticPositionDataSender(_cancellationTokenSourceForAutoSenders.Token);
-        StartAutomaticFlightPlanDataSender(_cancellationTokenSourceForAutoSenders.Token);
-        socket.OnMessage = (data) => OnMessageHandler(socket, data).RunSynchronously();
+        // StartAutomaticPositionDataSender(_cancellationTokenSourceForAutoSenders.Token);
+        // StartAutomaticFlightPlanDataSender(_cancellationTokenSourceForAutoSenders.Token);
+        socket.OnMessage = (data) => OnMessageHandler(socket, data).GetAwaiter().GetResult();
     }
 
     private void OnCloseHandler(IWebSocketConnection socket)
@@ -64,7 +66,7 @@ public class WebSocketRelayHostedService : IHostedService
     
     private async Task OnMessageHandler(IWebSocketConnection config, string data)
     {
-        var request = JsonSerializer.Deserialize<WebSocketRequest>(data)!;
+        var request = JsonSerializer.Deserialize<WebSocketRequest>(data, _jsonOptions)!;
         WebSocketResponse? response = null;
 
         try
@@ -78,8 +80,8 @@ public class WebSocketRelayHostedService : IHostedService
                     "GETALL_FP" => await _mediator.Send(new GetAllFlightPlanCommand()),
                     "ASSUME" => await _mediator.Send(new AssumeCommand(request.Data.ToString() ?? string.Empty)),
                     "RELEASE" => await _mediator.Send(new ReleaseCommand(request.Data.ToString() ?? string.Empty)),
-                    "TRANSFERT" => await _mediator.Send(request.GetData<TransfertCommand>()),
-                    "SET_TRAFFIC" => await _mediator.Send(request.GetData<SetTrafficCommand>()),
+                    "TRANSFERT" => await _mediator.Send(request.GetData<TransfertCommand>(_jsonOptions)),
+                    "SET_TRAFFIC" => await _mediator.Send(request.GetData<SetTrafficCommand>(_jsonOptions)),
                     _ => throw new CommandUnknownException()
                 }
             );
@@ -101,7 +103,7 @@ public class WebSocketRelayHostedService : IHostedService
             );
         }
 
-        await config.Send(JsonSerializer.Serialize(response));
+        await config.Send(JsonSerializer.Serialize(response, _jsonOptions));
     }
 
     private async Task StartAutomaticPositionDataSender(CancellationToken cts)

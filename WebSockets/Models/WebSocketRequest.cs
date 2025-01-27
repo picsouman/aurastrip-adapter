@@ -2,7 +2,7 @@ using System.Text.Json;
 
 public record WebSocketRequest(string RequestId, string Method, object Data)
 {
-    public T GetData<T>()
+    public T GetData<T>(JsonSerializerOptions options)
     {
         if (Data is T directCast)
         {
@@ -15,6 +15,6 @@ public record WebSocketRequest(string RequestId, string Method, object Data)
         }
 
         var json = JsonSerializer.Serialize(Data);
-        return JsonSerializer.Deserialize<T>(json) ?? throw new FormatException("The given data given as parameter is not compatible with the method");
+        return JsonSerializer.Deserialize<T>(json, options) ?? throw new FormatException("The given data given as parameter is not compatible with the method");
     }
 }
