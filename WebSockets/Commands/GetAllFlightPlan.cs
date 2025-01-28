@@ -50,7 +50,7 @@ public class GetAllFlightPlanCommandHandler : IRequestHandler<GetAllFlightPlanCo
                     continue;
                 }
                 flightPlanData[0] = callsign; // replace the first slot by the callsign
-                flightPlanList.Add(FlightPlanRecord.ParseFromString(flightPlanData.ToArray()));
+                flightPlanList.Add(FlightPlanRecord.ParseFromString(flightPlanData.Skip(1).ToArray()));
             }
             return flightPlanList;
         });
@@ -67,8 +67,8 @@ public enum FlightPlanIndexes
     EstimatedDepartureTime = 4,
     AircraftICAO = 5,
     WakeTurbulence = 6,
-    FlightType = 7,
-    FlightRules = 8,
+    FlightRules = 7,
+    FlightType = 8,
     Equipment = 9,
     CruisingAltitude = 10,
     CruisingSpeed = 11,

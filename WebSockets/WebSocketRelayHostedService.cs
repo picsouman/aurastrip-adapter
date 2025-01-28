@@ -118,9 +118,9 @@ public class WebSocketRelayHostedService : IHostedService
                 var wsResponse = new WebSocketResponse(
                     RequestId: String.Empty,
                     ReturnCode: "AUTO_POS",
-                    Data: JsonSerializer.Serialize(await _mediator.Send(new GetAllPositionCommand()))
+                    Data: JsonSerializer.Serialize(await _mediator.Send(new GetAllPositionCommand()), _jsonOptions)
                 );
-                await _currentConnection!.Send(JsonSerializer.Serialize(wsResponse));
+                await _currentConnection!.Send(JsonSerializer.Serialize(wsResponse, _jsonOptions));
                 await Task.Delay(1000, cts);
                 
             } catch(Exception) {}
@@ -136,9 +136,9 @@ public class WebSocketRelayHostedService : IHostedService
                 var wsResponse = new WebSocketResponse(
                     RequestId: String.Empty,
                     ReturnCode: "AUTO_FP",
-                    Data: JsonSerializer.Serialize(await _mediator.Send(new GetAllFlightPlanCommand()))
+                    Data: JsonSerializer.Serialize(await _mediator.Send(new GetAllFlightPlanCommand()), _jsonOptions)
                 );
-                await _currentConnection!.Send(JsonSerializer.Serialize(wsResponse));
+                await _currentConnection!.Send(JsonSerializer.Serialize(wsResponse, _jsonOptions));
                 await Task.Delay(15000, cts);
                 
             } catch(Exception) {}
