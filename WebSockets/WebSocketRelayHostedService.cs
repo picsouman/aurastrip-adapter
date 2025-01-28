@@ -48,10 +48,12 @@ public class WebSocketRelayHostedService : IHostedService
             return;
         }
 
+        Console.WriteLine("Client connected");
+        
         _currentConnection = socket;
         _cancellationTokenSourceForAutoSenders = new CancellationTokenSource();
-        // StartAutomaticPositionDataSender(_cancellationTokenSourceForAutoSenders.Token);
-        // StartAutomaticFlightPlanDataSender(_cancellationTokenSourceForAutoSenders.Token);
+        StartAutomaticPositionDataSender(_cancellationTokenSourceForAutoSenders.Token);
+        StartAutomaticFlightPlanDataSender(_cancellationTokenSourceForAutoSenders.Token);
         socket.OnMessage = (data) => OnMessageHandler(socket, data).GetAwaiter().GetResult();
     }
 
@@ -59,6 +61,7 @@ public class WebSocketRelayHostedService : IHostedService
     {
         if (_currentConnection == socket)
         {
+            Console.WriteLine("Client disconnected");
             _cancellationTokenSourceForAutoSenders.Cancel();
             _currentConnection = null;
         }
