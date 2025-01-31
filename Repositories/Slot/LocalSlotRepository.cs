@@ -28,12 +28,23 @@ namespace aurastrip_adapter.Repositories.Slot
 
         public void Update(Models.Slot model)
         {
-            context.Entry(model).State = EntityState.Modified;
+            var slotToUpdate = context.Slots.Find(model.Id);
+            if(slotToUpdate is null)
+            {
+                return;
+            }
+            
+            slotToUpdate.Name = model.Name;
+            slotToUpdate.ColumnId = model.ColumnId;
+            slotToUpdate.Index = model.Index;
+            slotToUpdate.SizePercentage = model.SizePercentage;
+            slotToUpdate.Type = model.Type;
+            slotToUpdate.Data = model.Data;
         }
 
         public void Delete(Guid id)
         {
-            var strip = context.Slots.FirstOrDefault(context => context.Id == id);
+            var strip = context.Slots.FirstOrDefault(slot => slot.Id == id);
             if (strip is null)
             {
                 return;
@@ -44,7 +55,7 @@ namespace aurastrip_adapter.Repositories.Slot
 
         public void DeleteAllAssignToColumn(Guid columnId)
         {
-            var slots = context.Slots.Where(context => context.ColumnId == columnId);
+            var slots = context.Slots.Where(slot => slot.ColumnId == columnId);
             context.Slots.RemoveRange(slots);
         }
 

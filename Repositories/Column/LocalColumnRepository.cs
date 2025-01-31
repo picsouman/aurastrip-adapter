@@ -28,18 +28,26 @@ namespace aurastrip_adapter.Repositories.Column
 
         public void Update(Models.Column model)
         {
-            context.Entry(model).State = EntityState.Modified;
+            var column = context.Columns.Find(model.Id);
+            if (column is null)
+            {
+                return;
+            }
+            
+            column.Id = model.Id;
+            column.ConfigurationId = model.ConfigurationId;
+            column.Index = model.Index;
         }
 
         public void Delete(Guid id)
         {
-            var columns = context.Columns.FirstOrDefault(context => context.Id == id);
-            if (columns is null)
+            var column = context.Columns.FirstOrDefault(column => column.Id == id);
+            if (column is null)
             {
                 return;
             }
 
-            context.Columns.Remove(columns);
+            context.Columns.Remove(column);
         }
 
         public void DeleteAllAssignToConfiguration(Guid configurationId)

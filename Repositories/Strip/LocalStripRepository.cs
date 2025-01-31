@@ -34,12 +34,25 @@ namespace aurastrip_adapter.Repositories.Strip
 
         public void Update(Models.Strip model)
         {
-            context.Entry(model).State = EntityState.Modified;
+            var existingStrip = context.Strips.Find(model.Id);
+            if (existingStrip is null)
+            {
+                return;
+            }
+            
+            existingStrip.Callsign = model.Callsign;
+            existingStrip.ConfigurationId = model.ConfigurationId;
+            existingStrip.Comment = model.Comment;
+            existingStrip.SlotId = model.SlotId;
+            existingStrip.Index = model.Index;
+            existingStrip.Gate = model.Gate;
+            existingStrip.Language = model.Language;
+            existingStrip.ClearedPush = model.ClearedPush;
         }
 
         public void Delete(Guid id)
         {
-            var strip = context.Strips.FirstOrDefault(context => context.Id == id);
+            var strip = context.Strips.FirstOrDefault(strip => strip.Id == id);
             if(strip is null)
             {
                 return;
@@ -50,7 +63,7 @@ namespace aurastrip_adapter.Repositories.Strip
 
         public void DeleteAllAssignedToSlot(Guid slotId)
         {
-            var strips = context.Strips.Where(context => context.SlotId == slotId);
+            var strips = context.Strips.Where(strip => strip.SlotId == slotId);
             context.Strips.RemoveRange(strips);
         }
 

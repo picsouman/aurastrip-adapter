@@ -24,12 +24,20 @@ namespace aurastrip_adapter.Services.Repositories.Configuration
 
         public void Update(Models.Configuration model)
         {
-            context.Entry(model).State = EntityState.Modified;
+            var configuration = context.Configurations.Find(model.Id);
+            if (configuration is null)
+            {
+                return;
+            }
+            
+            configuration.Id = model.Id;
+            configuration.Name = model.Name;
+            configuration.CreationUtc = model.CreationUtc;
         }
 
         public void Delete(Guid id)
         {
-            var configuration = context.Configurations.FirstOrDefault(context => context.Id == id);
+            var configuration = context.Configurations.FirstOrDefault(configuration => configuration.Id == id);
             if (configuration is null)
             {
                 return;

@@ -26,20 +26,28 @@ namespace aurastrip_adapter.Services
 
         public async Task<Strip> SetStripAsync(Strip model, CancellationToken cancellation)
         {
-            var strip = repository.GetById(model.Id);
-            if(strip is null)
+            try
             {
-                model.Id = Guid.NewGuid();
-                repository.Create(model);
+                var strip = repository.GetById(model.Id);
+                if(strip is null)
+                {
+                    model.Id = Guid.NewGuid();
+                    repository.Create(model);
+                }
+                else
+                {
+                    repository.Update(model);
+                }
+
+                await repository.SaveAsync(cancellation);
+
+                return model;
             }
-            else
+            catch (Exception e)
             {
-                repository.Update(model);
+                Console.WriteLine(e);
+                return new Strip();
             }
-
-            await repository.SaveAsync(cancellation);
-
-            return model;
         }
 
         public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
