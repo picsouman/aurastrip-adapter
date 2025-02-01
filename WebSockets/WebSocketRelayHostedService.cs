@@ -24,7 +24,7 @@ public class WebSocketRelayHostedService : IHostedService
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
-        Console.WriteLine("Starting WebSocketRelayHostedService");
+        Console.WriteLine("[WS] Starting server");
         _server.Start(socket =>
         {
             socket.OnOpen = () => OnOpenHandler(socket);
@@ -48,7 +48,7 @@ public class WebSocketRelayHostedService : IHostedService
             return;
         }
 
-        Console.WriteLine("Client connected");
+        Console.WriteLine($"[WS] Client connected with ip {socket.ConnectionInfo.ClientIpAddress} at {DateTime.Now:HH:mm:ss}");
         
         _currentConnection = socket;
         _cancellationTokenSourceForAutoSenders = new CancellationTokenSource();
@@ -61,7 +61,7 @@ public class WebSocketRelayHostedService : IHostedService
     {
         if (_currentConnection == socket)
         {
-            Console.WriteLine("Client disconnected");
+            Console.WriteLine($"[WS] Client disconnected with ip {socket.ConnectionInfo.ClientIpAddress} at {DateTime.Now:HH:mm:ss}");
             _cancellationTokenSourceForAutoSenders.Cancel();
             _currentConnection = null;
         }
@@ -74,6 +74,7 @@ public class WebSocketRelayHostedService : IHostedService
 
         try
         {
+            Console.WriteLine($"[WS] Received request: {request.Method}");
             response = new WebSocketResponse(
                 RequestId: request.RequestId,
                 ReturnCode: "OK",
