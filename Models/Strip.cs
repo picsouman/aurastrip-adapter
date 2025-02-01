@@ -14,5 +14,6 @@ namespace aurastrip_adapter.Models
         public string Comment { get; set; } = string.Empty;
         public string Gate { get; set; } = string.Empty;
         public bool ClearedPush { get; set; } = false;
+        public bool ClearedStart { get; set; } = false;
     }
 }
