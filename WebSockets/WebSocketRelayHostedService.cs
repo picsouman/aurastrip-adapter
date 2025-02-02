@@ -75,17 +75,18 @@ public class WebSocketRelayHostedService : IHostedService
         try
         {
             Console.WriteLine($"[WS] Received request: {request.Method}, Data : ${data}");
+            CancellationTokenSource timeoutCancellationTokenSource = new(TimeSpan.FromSeconds(2));
             response = new WebSocketResponse(
                 RequestId: request.RequestId,
                 ReturnCode: "OK",
                 Data: request.Method switch
                 {
-                    "GETALL_POS" => await _mediator.Send(new GetAllPositionCommand()),
-                    "GETALL_FP" => await _mediator.Send(new GetAllFlightPlanCommand()),
-                    "ASSUME" => await _mediator.Send(new AssumeCommand(request.Data.ToString() ?? string.Empty)),
-                    "RELEASE" => await _mediator.Send(new ReleaseCommand(request.Data.ToString() ?? string.Empty)),
-                    "TRANSFERT" => await _mediator.Send(request.GetData<TransfertCommand>(_jsonOptions)),
-                    "SET_TRAFFIC" => await _mediator.Send(request.GetData<SetTrafficCommand>(_jsonOptions)),
+                    "GETALL_POS" => await _mediator.Send(new GetAllPositionCommand(), timeoutCancellationTokenSource.Token),
+                    "GETALL_FP" => await _mediator.Send(new GetAllFlightPlanCommand(), timeoutCancellationTokenSource.Token),
+                    "ASSUME" => await _mediator.Send(new AssumeCommand(request.Data.ToString() ?? string.Empty), timeoutCancellationTokenSource.Token),
+                    "RELEASE" => await _mediator.Send(new ReleaseCommand(request.Data.ToString() ?? string.Empty), timeoutCancellationTokenSource.Token),
+                    "TRANSFERT" => await _mediator.Send(request.GetData<TransfertCommand>(_jsonOptions), timeoutCancellationTokenSource.Token),
+                    "SET_TRAFFIC" => await _mediator.Send(request.GetData<SetTrafficCommand>(_jsonOptions), timeoutCancellationTokenSource.Token),
                     _ => throw new CommandUnknownException()
                 }
             );

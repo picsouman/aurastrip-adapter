@@ -19,12 +19,15 @@ namespace aurastrip_adapter.WebSockets.Commands
         {
             return await auroraService.ExecuteTransaction(async (auroraTcp) =>
             {
+                var stream = auroraTcp.GetStream();
+                var streamReader = new StreamReader(stream, System.Text.Encoding.ASCII);
+                
                 var dataBytes = System.Text.Encoding.ASCII.GetBytes($"#TRRE;{request.Callsign};{Environment.NewLine}");
-                await auroraTcp.GetStream().WriteAsync(dataBytes, 0, dataBytes.Length, cancellationToken);
+                await stream.WriteAsync(dataBytes, 0, dataBytes.Length, cancellationToken);
 
-                var buffer = new byte[1];
-                var _ = await auroraTcp.GetStream().ReadAsync(buffer, 0, 1, cancellationToken).WaitAsync(TimeSpan.FromSeconds(2));
-
+                _ = await streamReader.ReadLineAsync(cancellationToken);
+                await stream.FlushAsync(cancellationToken);
+                
                 return true;
             });
         }
