@@ -11,10 +11,10 @@ public record WebSocketRequest(string RequestId, string Method, object Data)
 
         if (Data is JsonElement jsonElement)
         {
-            return jsonElement.Deserialize<T>() ?? throw new FormatException("The given data given as parameter is not compatible with the method");
+            return jsonElement.Deserialize<T>(options) ?? throw new FormatException("The given data given as parameter is not compatible with the method");
         }
 
-        var json = JsonSerializer.Serialize(Data);
+        var json = JsonSerializer.Serialize(Data, options);
         return JsonSerializer.Deserialize<T>(json, options) ?? throw new FormatException("The given data given as parameter is not compatible with the method");
     }
 }
