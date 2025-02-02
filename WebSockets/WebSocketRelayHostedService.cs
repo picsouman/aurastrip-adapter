@@ -74,7 +74,7 @@ public class WebSocketRelayHostedService : IHostedService
 
         try
         {
-            Console.WriteLine($"[WS] Received request: {request.Method}");
+            Console.WriteLine($"[WS] Received request: {request.Method}, Data : ${data}");
             response = new WebSocketResponse(
                 RequestId: request.RequestId,
                 ReturnCode: "OK",
