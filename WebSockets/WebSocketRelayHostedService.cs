@@ -1,6 +1,7 @@
 using System.Text.Json;
 using aurastrip_adapter.Exceptions;
 using aurastrip_adapter.WebSockets.Commands;
+using aurastrip_adapter.WebSockets.Dtos;
 using Fleck;
 using MediatR;
 using Console = System.Console;
@@ -52,6 +53,7 @@ public class WebSocketRelayHostedService : IHostedService
         
         _currentConnection = socket;
         _cancellationTokenSourceForAutoSenders = new CancellationTokenSource();
+        StartAutomaticControllerDataSender(_cancellationTokenSourceForAutoSenders.Token);
         StartAutomaticPositionDataSender(_cancellationTokenSourceForAutoSenders.Token);
         StartAutomaticFlightPlanDataSender(_cancellationTokenSourceForAutoSenders.Token);
         socket.OnMessage = (data) => OnMessageHandler(socket, data).GetAwaiter().GetResult();
@@ -111,6 +113,30 @@ public class WebSocketRelayHostedService : IHostedService
         await config.Send(JsonSerializer.Serialize(response, _jsonOptions));
     }
 
+    private async Task StartAutomaticControllerDataSender(CancellationToken token)
+    {
+        while (!token.IsCancellationRequested)
+        {
+            try
+            {
+                var controllerData = await _mediator.Send(new GetControllerDataCommand());
+                var generalDataToSend = new GeneralDatasDto(
+                    ApiVersion: "0.1.0",
+                    PositionName: controllerData.PositionName
+                );
+                
+                var wsResponse = new WebSocketResponse(
+                    RequestId: String.Empty,
+                    ReturnCode: "AUTO_GENERAL_DATA",
+                    Data: JsonSerializer.Serialize(generalDataToSend, _jsonOptions)
+                );
+                await _currentConnection!.Send(JsonSerializer.Serialize(wsResponse, _jsonOptions));
+                await Task.Delay(5000, token);
+            }
+            catch(Exception) {}
+        }
+    }
+    
     private async Task StartAutomaticPositionDataSender(CancellationToken cts)
     {
         while (!cts.IsCancellationRequested)
