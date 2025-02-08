@@ -14,6 +14,11 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenLocalhost(5131);
+});
+
 builder.Services.AddDbContext<ConfigurationDbContext>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -58,6 +63,14 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<ConfigurationDbContext>();
+    
+    var dbConnexion = dbContext.Database.GetDbConnection();
+    dbConnexion.Open();
+    using (var command = dbConnexion.CreateCommand())
+    {
+        command.CommandText = "DELETE FROM __EFMigrationsLock";
+        command.ExecuteNonQuery();
+    }
     dbContext.Database.Migrate();
     
     var relayService = scope.ServiceProvider.GetRequiredService<WebSocketRelayHostedService>();
