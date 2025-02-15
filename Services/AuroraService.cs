@@ -27,7 +27,7 @@ namespace aurastrip_adapter.Services
 
             await _tcpClient
                 .ConnectAsync(_host, _port)
-                .WaitAsync(TimeSpan.FromSeconds(2));
+                .WaitAsync(TimeSpan.FromSeconds(1));
         }
 
         public async Task<T> ExecuteTransaction<T>(Func<TcpClient, Task<T>> action)

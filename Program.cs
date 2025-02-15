@@ -64,12 +64,11 @@ using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<ConfigurationDbContext>();
     
-    var dbConnexion = dbContext.Database.GetDbConnection();
-    dbConnexion.Open();
-    using (var command = dbConnexion.CreateCommand())
+    var db = dbContext.Database;
+    var lockExists = db.ExecuteSqlRaw("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='__EFMigrationsLock';");
+    if (lockExists > 0)
     {
-        command.CommandText = "DELETE FROM __EFMigrationsLock";
-        command.ExecuteNonQuery();
+        db.ExecuteSqlRaw("DELETE FROM __EFMigrationsLock;");
     }
     dbContext.Database.Migrate();
     

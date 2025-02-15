@@ -76,7 +76,7 @@ public class WebSocketRelayHostedService : IHostedService
 
         try
         {
-            Console.WriteLine($"[WS] Received request: {request.Method}, Data : ${data}");
+            Console.WriteLine($"[WS] Received request at {DateTime.Now:HH:mm:ss}: {request.Method}, Data : ${data}");
             CancellationTokenSource timeoutCancellationTokenSource = new(TimeSpan.FromSeconds(2));
             response = new WebSocketResponse(
                 RequestId: request.RequestId,
@@ -119,10 +119,16 @@ public class WebSocketRelayHostedService : IHostedService
         {
             try
             {
-                var controllerData = await _mediator.Send(new GetControllerDataCommand());
+                ControllerData? controllerData = null;
+                try
+                {
+                    controllerData = await _mediator.Send(new GetControllerDataCommand(), token);
+                }
+                catch(Exception) {}
+                
                 var generalDataToSend = new GeneralDatasDto(
-                    ApiVersion: "0.1.0",
-                    PositionName: controllerData.PositionName
+                    ApiVersion: "0.1.1",
+                    PositionName: controllerData?.PositionName ?? string.Empty
                 );
                 
                 var wsResponse = new WebSocketResponse(
