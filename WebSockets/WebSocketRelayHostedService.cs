@@ -30,6 +30,7 @@ public class WebSocketRelayHostedService : IHostedService
         {
             socket.OnOpen = () => OnOpenHandler(socket);
             socket.OnClose = () => OnCloseHandler(socket);
+            socket.OnError = (e) => OnErrorHandler(socket, e);
         });
 
         return Task.CompletedTask;
@@ -63,9 +64,16 @@ public class WebSocketRelayHostedService : IHostedService
     {
         if (_currentConnection == socket)
         {
-            Console.WriteLine($"[WS] Client disconnected with ip {socket.ConnectionInfo.ClientIpAddress} at {DateTime.Now:HH:mm:ss}");
-            _cancellationTokenSourceForAutoSenders.Cancel();
-            _currentConnection = null;
+            CloseCurrentConnexion();
+        }
+    }
+    
+    private void OnErrorHandler(IWebSocketConnection socket, Exception e)
+    {
+        Console.WriteLine($"WebSocket Error : {e.Message}");
+        if (_currentConnection == socket)
+        {
+            CloseCurrentConnexion();
         }
     }
     
@@ -76,7 +84,7 @@ public class WebSocketRelayHostedService : IHostedService
 
         try
         {
-            Console.WriteLine($"[WS] Received request at {DateTime.Now:HH:mm:ss}: {request.Method}, Data : ${data}");
+            Console.WriteLine($"[WS] Received request at {DateTime.Now:HH:mm:ss}: {request.Method}, Data : {data}");
             CancellationTokenSource timeoutCancellationTokenSource = new(TimeSpan.FromSeconds(2));
             response = new WebSocketResponse(
                 RequestId: request.RequestId,
@@ -113,6 +121,17 @@ public class WebSocketRelayHostedService : IHostedService
         await config.Send(JsonSerializer.Serialize(response, _jsonOptions));
     }
 
+    private void CloseCurrentConnexion()
+    {
+        Console.WriteLine($"[WS] Client disconnected with ip {_currentConnection.ConnectionInfo.ClientIpAddress} at {DateTime.Now:HH:mm:ss}");
+        _cancellationTokenSourceForAutoSenders.Cancel();
+        try
+        {
+            _currentConnection.Close();
+        } catch(Exception) {}
+        _currentConnection = null;
+    }
+    
     private async Task StartAutomaticControllerDataSender(CancellationToken token)
     {
         while (!token.IsCancellationRequested)
