@@ -29,7 +29,7 @@ namespace aurastrip_adapter.WebSockets.Commands
                 
                 if (request.Waypoint is not null)
                 {
-                    var dataBytes = System.Text.Encoding.ASCII.GetBytes($"#LBWP;{request.Callsign};{request.Waypoint}{Environment.NewLine}");
+                    var dataBytes = System.Text.Encoding.ASCII.GetBytes($"#LBWP;{request.Callsign};{request.Waypoint};{Environment.NewLine}");
                     await stream.WriteAsync(dataBytes, 0, dataBytes.Length, cancellationToken);
                     _ = await streamReader.ReadLineAsync(cancellationToken);
                     await stream.FlushAsync(cancellationToken);
@@ -37,7 +37,7 @@ namespace aurastrip_adapter.WebSockets.Commands
 
                 if (request.FlightLevel is not null)
                 {
-                    var dataBytes = System.Text.Encoding.ASCII.GetBytes($"#LBALT;{request.Callsign};{request.FlightLevel}{Environment.NewLine}");
+                    var dataBytes = System.Text.Encoding.ASCII.GetBytes($"#LBALT;{request.Callsign};{request.FlightLevel};{Environment.NewLine}");
                     await stream.WriteAsync(dataBytes, 0, dataBytes.Length, cancellationToken);
                     var response = await streamReader.ReadLineAsync(cancellationToken);
                     await stream.FlushAsync(cancellationToken);
@@ -45,7 +45,7 @@ namespace aurastrip_adapter.WebSockets.Commands
 
                 if (request.Speed is not null)
                 {
-                    var dataBytes = System.Text.Encoding.ASCII.GetBytes($"#LBSPD;{request.Callsign};{request.Speed}{Environment.NewLine}");
+                    var dataBytes = System.Text.Encoding.ASCII.GetBytes($"#LBSPD;{request.Callsign};{request.Speed};{Environment.NewLine}");
                     await stream.WriteAsync(dataBytes, 0, dataBytes.Length, cancellationToken);
                     _ = await streamReader.ReadLineAsync(cancellationToken);
                     await stream.FlushAsync(cancellationToken);
@@ -53,7 +53,7 @@ namespace aurastrip_adapter.WebSockets.Commands
 
                 if (request.Squawk is not null)
                 {
-                    var dataBytes = System.Text.Encoding.ASCII.GetBytes($"#LBSQK;{request.Callsign};{request.Squawk}{Environment.NewLine}");
+                    var dataBytes = System.Text.Encoding.ASCII.GetBytes($"#LBSQK;{request.Callsign};{request.Squawk};{Environment.NewLine}");
                     await stream.WriteAsync(dataBytes, 0, dataBytes.Length, cancellationToken);
                     _ = await streamReader.ReadLineAsync(cancellationToken);
                     await stream.FlushAsync(cancellationToken);
