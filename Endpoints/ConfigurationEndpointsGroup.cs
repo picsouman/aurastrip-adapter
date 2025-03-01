@@ -70,11 +70,13 @@ namespace aurastrip_adapter.Controllers
                 CreationUtc = configuration.CreationUtc,
                 Columns = columnService
                     .GetAllForConfigurationId(id)
+                    .OrderBy(column => column.Index)
                     .Select(column => new ColumnFullDto()
                     {
                         Id = column.Id,
                         Slots = slotService
                             .GetAllForColumnId(column.Id)
+                            .OrderBy(slot => slot.Index)
                             .Select(slot => new SlotFullDto()
                             {
                                 Id = slot.Id,
@@ -83,10 +85,8 @@ namespace aurastrip_adapter.Controllers
                                 Type = slot.Type,
                                 Data = slot.Data
                             })
-                            .OrderBy(slot => slot.Index)
                             .ToArray(),
                     })
-                    .OrderBy(column => column.Index)
                     .ToArray(),
             };
 
