@@ -100,6 +100,9 @@ namespace aurastrip_adapter.Migrations
                     b.Property<bool>("ClearedStart")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("ClearedTakeOff")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Comment")
                         .IsRequired()
                         .HasColumnType("TEXT");
