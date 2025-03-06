@@ -49,6 +49,7 @@ namespace aurastrip_adapter.Repositories.Strip
             existingStrip.Language = model.Language;
             existingStrip.ClearedPush = model.ClearedPush;
             existingStrip.ClearedStart = model.ClearedStart;
+            existingStrip.ClearedTakeOff = model.ClearedTakeOff;
         }
 
         public void Delete(Guid id)
