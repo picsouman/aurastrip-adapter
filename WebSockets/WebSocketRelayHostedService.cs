@@ -146,7 +146,7 @@ public class WebSocketRelayHostedService : IHostedService
                 catch(Exception) {}
                 
                 var generalDataToSend = new GeneralDatasDto(
-                    ApiVersion: "0.1.1",
+                    ApiVersion: "0.2.0",
                     PositionName: controllerData?.PositionName ?? string.Empty
                 );
                 
