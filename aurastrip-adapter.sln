@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.8.34316.72
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "aurastrip-adapter", "aurastrip-adapter.csproj", "{03E27503-25D5-42A9-80F2-F9719EDA7858}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "aurastrip-adapter.app", "app\aurastrip-adapter.app.csproj", "{03E27503-25D5-42A9-80F2-F9719EDA7858}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
