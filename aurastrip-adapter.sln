@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.8.34316.72
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "aurastrip-adapter.app", "app\aurastrip-adapter.app.csproj", "{03E27503-25D5-42A9-80F2-F9719EDA7858}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "aurastrip-adapter.app", "aurastrip-adapter.app\aurastrip-adapter.app.csproj", "{3C1DEC15-174F-B9BE-EBD1-3BD72BA8EA47}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,10 +11,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{03E27503-25D5-42A9-80F2-F9719EDA7858}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{03E27503-25D5-42A9-80F2-F9719EDA7858}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{03E27503-25D5-42A9-80F2-F9719EDA7858}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{03E27503-25D5-42A9-80F2-F9719EDA7858}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3C1DEC15-174F-B9BE-EBD1-3BD72BA8EA47}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3C1DEC15-174F-B9BE-EBD1-3BD72BA8EA47}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3C1DEC15-174F-B9BE-EBD1-3BD72BA8EA47}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3C1DEC15-174F-B9BE-EBD1-3BD72BA8EA47}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
