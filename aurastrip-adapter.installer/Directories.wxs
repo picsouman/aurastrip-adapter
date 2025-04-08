@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi"
+	 xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
+	<Fragment>
+		
+		<?define MainFolder = "AurastripAdapter" ?>
+		<?if $(var.Platform)=x64 ?>
+			<?define PgFolder = "ProgramFiles64Folder" ?>
+		<?else ?>
+			<?define PgFolder = "ProgramFilesFolder" ?>
+		<?endif ?>
+
+		<Directory Id="TARGETDIR" Name="SourceDir">
+				<Directory Id="$(var.PgFolder)">
+					<Directory Id="INSTALLFOLDER" Name="$(var.MainFolder)" >
+						<Directory Id="APPFOLDER" Name="app" />
+						<Directory Id="DATAFOLDER" Name="data" />
+						<Directory Id="LINKERFOLDER" Name="linker" />
+					</Directory>
+				</Directory>
+		</Directory>
+
+		<DirectoryRef Id="DATAFOLDER">
+			<!-- Modifier les permissions pour être moins permissives mais fonctionnelles -->
+			<Component Id="DataFolderPermissions" Guid="{0fda8d64-4ef7-4039-8b33-e031de106fd3}" KeyPath="yes">
+				<CreateFolder>
+					<Permission User="Administrators" GenericAll="yes" />
+					<Permission User="SYSTEM" GenericAll="yes" />
+					<util:PermissionEx User="Users" GenericAll="yes"/>
+				</CreateFolder>
+			</Component>
+		</DirectoryRef>
+
+	</Fragment>
+</Wix>

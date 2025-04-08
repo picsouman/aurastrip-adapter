@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+	<Fragment>
+		<!--<ComponentGroup Id="DeepLinksComponentGroup" Directory="LINKERFOLDER">
+
+			<Component Id="DeepLinksComponent" Guid="{c4d57382-f75b-44be-802f-ecdd5f3755f2}">
+				--><!-- Configuration des DeepLinks avec plus de détails et sécurité --><!--
+				<RegistryKey Root="HKCR" Key="aurastrip">
+					<RegistryValue Type="string" Value="URL:Aurastrip Protocol" KeyPath="yes" />
+					<RegistryValue Type="string" Name="URL Protocol" Value="" />
+					--><!-- Icône pour le protocole --><!--
+					<RegistryValue Type="string" Name="DefaultIcon" Value="[APPFOLDER]aurastrip-adapter.app.exe,0" />
+
+					<RegistryKey Key="shell\open\command">
+						<RegistryValue Type="string"
+									   Value="cmd.exe /C &quot;[LINKERFOLDER]handle_aurastrip.bat&quot; &quot;%1&quot;" />
+					</RegistryKey>
+				</RegistryKey>
+
+				--><!-- Enregistrement de l'application comme gestionnaire du protocole aurastrip --><!--
+				<RegistryKey Root="HKLM" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\aurastrip-adapter.app.exe">
+					<RegistryValue Type="string" Value="[APPFOLDER]aurastrip-adapter.app.exe" />
+					<RegistryValue Type="string" Name="Path" Value="[APPFOLDER]" />
+				</RegistryKey>
+			</Component>
+
+		</ComponentGroup>-->
+	</Fragment>
+</Wix>

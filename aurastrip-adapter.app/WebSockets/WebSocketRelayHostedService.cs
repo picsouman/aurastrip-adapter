@@ -1,3 +1,5 @@
+using System.Data;
+using System.Reflection;
 using System.Text.Json;
 using aurastrip_adapter.Exceptions;
 using aurastrip_adapter.WebSockets.Commands;
@@ -15,11 +17,13 @@ public class WebSocketRelayHostedService : IHostedService
     private readonly JsonSerializerOptions _jsonOptions;
     private IWebSocketConnection? _currentConnection = null;
     private CancellationTokenSource _cancellationTokenSourceForAutoSenders = new();
-    
+    private Version _buildVersion;
+
     public WebSocketRelayHostedService(IMediator mediator, JsonSerializerOptions jsonOptions)
     {
         _mediator = mediator;
         _jsonOptions = jsonOptions;
+        _buildVersion = Assembly.GetExecutingAssembly().GetName().Version ?? throw new VersionNotFoundException("No version");
         _server = new WebSocketServer("ws://0.0.0.0:6969");
     }
 
@@ -146,7 +150,7 @@ public class WebSocketRelayHostedService : IHostedService
                 catch(Exception) {}
                 
                 var generalDataToSend = new GeneralDatasDto(
-                    ApiVersion: "0.2.0",
+                    ApiVersion: _buildVersion.ToString(),
                     PositionName: controllerData?.PositionName ?? string.Empty
                 );
                 

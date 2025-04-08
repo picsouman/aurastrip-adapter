@@ -12,10 +12,16 @@ namespace aurastrip_adapter.Contexts
 
         private readonly string DbPath;
 
-        public ConfigurationDbContext() {
-            //var folder = Environment.SpecialFolder.LocalApplicationData;
-            //var path = Environment.GetFolderPath(folder);
-            DbPath = "configuration.db";
+        public ConfigurationDbContext(IWebHostEnvironment env) {
+            if(env.IsDevelopment())
+            {
+                DbPath = "configuration.db";
+            }
+            else
+            {
+                var directory = Directory.GetParent(AppContext.BaseDirectory)!.Parent!;
+                DbPath = $"{directory.FullName}\\data\\configuration.db";
+            }
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

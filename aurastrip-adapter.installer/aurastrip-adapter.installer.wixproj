@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" InitialTargets="EnsureWixToolsetInstalled" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>3.10</ProductVersion>
+    <ProjectGuid>6f041f50-3015-4b51-87d5-efd491554b3a</ProjectGuid>
+    <SchemaVersion>2.0</SchemaVersion>
+    <OutputName>aurastrip_adapter.installer</OutputName>
+    <OutputType>Package</OutputType>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <OutputPath>bin\$(Configuration)\</OutputPath>
+    <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
+    <DefineConstants>Debug</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <OutputPath>bin\$(Configuration)\</OutputPath>
+    <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AppDir>..\aurastrip-adapter.app\</AppDir>
+    <AppPublishDir>$(AppDir)bin\publish-for-installer\</AppPublishDir>
+  </PropertyGroup>
+  <PropertyGroup>
+    <LuncherDir>..\aurastrip-adapter.luncher\</LuncherDir>
+    <LuncherPublishDir>$(LuncherDir)bin\publish-for-installer\</LuncherPublishDir>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Components.wxs" />
+    <Compile Include="Directories.wxs" />
+    <Compile Include="Product.wxs" />
+    <Compile Include="Deeplinks.wxs" />
+  </ItemGroup>
+  <ItemGroup>
+    <WixExtension Include="WixUIExtension">
+      <HintPath>$(WixExtDir)WixUIExtension.dll</HintPath>
+      <Name>WixUIExtension</Name>
+    </WixExtension>
+    <WixExtension Include="WixUtilExtension">
+      <HintPath>$(WixExtDir)WixUtilExtension.dll</HintPath>
+      <Name>WixUtilExtension</Name>
+    </WixExtension>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\aurastrip-adapter.app\aurastrip-adapter.app.csproj">
+      <Name>aurastrip-adapter.app</Name>
+      <Project>{3c1dec15-174f-b9be-ebd1-3bd72ba8ea47}</Project>
+      <Private>True</Private>
+      <DoNotHarvest>True</DoNotHarvest>
+      <RefProjectOutputGroups>Binaries;Content;Satellites</RefProjectOutputGroups>
+      <RefTargetDir>INSTALLFOLDER</RefTargetDir>
+    </ProjectReference>
+    <ProjectReference Include="..\aurastrip-adapter.luncher\aurastrip-adapter.luncher.csproj">
+      <Name>aurastrip-adapter.luncher</Name>
+      <Project>{1ecf5fc4-56e7-46f6-8354-e578622c2e95}</Project>
+      <Private>True</Private>
+      <DoNotHarvest>True</DoNotHarvest>
+      <RefProjectOutputGroups>Binaries;Content;Satellites</RefProjectOutputGroups>
+      <RefTargetDir>INSTALLFOLDER</RefTargetDir>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Assets" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Assets\license-en.rtf" />
+  </ItemGroup>
+  <Import Project="$(WixTargetsPath)" Condition=" '$(WixTargetsPath)' != '' " />
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.targets" Condition=" '$(WixTargetsPath)' == '' AND Exists('$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.targets') " />
+  <Target Name="EnsureWixToolsetInstalled" Condition=" '$(WixTargetsImported)' != 'true' ">
+    <Error Text="The WiX Toolset v3.11 build tools must be installed to build this project. To download the WiX Toolset, see https://wixtoolset.org/releases/v3.11/stable" />
+  </Target>
+  <Target Name="BeforeBuild">
+    <Exec Command="rd /q /s $(AppPublishDir)" />
+    <Exec Command="dotnet publish ..\aurastrip-adapter.app\aurastrip-adapter.app.csproj -o $(AppPublishDir) -c $(Configuration) -r win-$(Platform) -p:PublishSingleFile=true --self-contained true" />
+    <Exec Command="rd /q /s $(LuncherPublishDir)" />
+    <Exec Command="dotnet publish ..\aurastrip-adapter.luncher\aurastrip-adapter.luncher.csproj -o $(LuncherPublishDir) -c $(Configuration) -r win-$(Platform) -p:PublishSingleFile=true --self-contained true" />
+    <Exec Command="powershell &quot;(Get-Item '$(AppPublishDir)aurastrip-adapter.app.exe').VersionInfo.FileVersion&quot;" ConsoleToMSBuild="true">
+      <Output TaskParameter="ConsoleOutput" PropertyName="ExeVersion" />
+    </Exec>
+    <PropertyGroup>
+      <DefineConstants>
+		  BuildVersion=$(ExeVersion);
+		  AppPublishDir=$(AppPublishDir);
+		  LuncherPublishDir=$(LuncherPublishDir);
+	  </DefineConstants>
+    </PropertyGroup>
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+</Project>

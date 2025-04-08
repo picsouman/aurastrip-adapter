@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi"
+	 xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
+	<Fragment>
+		<DirectoryRef Id="APPFOLDER">
+			<Component Id="cmp17cb0e566884a34b2d1aaddc34b3b3f" Guid="{a17cb0e5-6688-4a34-b2d1-aaddc34b3b3f}">
+				<File Id="file17cb0e566884a34b2d1aaddc34b3b3f" KeyPath="yes" Source="$(var.AppPublishDir)aurastrip-adapter.app.exe" />
+
+				<ServiceInstall
+                    Id="ServiceInstallerApp"
+                    Type="ownProcess"
+                    Name="AurastripAdapter"
+                    DisplayName="Aurastrip Adapter Service"
+                    Description="Service AurastripAdapter"
+                    Start="demand"
+                    ErrorControl="normal"
+                    Account="LocalSystem">
+					<util:ServiceConfig
+                        FirstFailureActionType="restart"
+                        SecondFailureActionType="restart"
+                        ThirdFailureActionType="restart"
+                        RestartServiceDelayInSeconds="5"
+                        ResetPeriodInDays="1" />
+				</ServiceInstall>
+
+				<ServiceControl
+                    Id="ServiceControlApp"
+                    Name="AurastripAdapter"
+                    Stop="both"
+                    Remove="uninstall"
+                    Wait="yes" />
+
+				<RegistryValue
+                    Root="HKLM"
+                    Key="SOFTWARE\AurastripAdapter"
+                    Name="ServiceInstalled"
+                    Type="integer"
+                    Value="1" />
+			</Component>
+			<Component Id="cmp75ce5038459945358ca1f68e624921c3" Guid="{75ce5038-4599-4535-8ca1-f68e624921c3}">
+				<File Id="filea75ce5038459945358ca1f68e624921c3" KeyPath="yes" Source="$(var.AppPublishDir)aspnetcorev2_inprocess.dll" />
+			</Component>
+			<Component Id="cmp904ed6c61a31422ebf2aeaba40385f59" Guid="{904ed6c6-1a31-422e-bf2a-eaba40385f59}">
+				<File Id="file904ed6c61a31422ebf2aeaba40385f59" KeyPath="yes" Source="$(var.AppPublishDir)e_sqlite3.dll" />
+			</Component>
+		</DirectoryRef>
+
+		<DirectoryRef Id="LINKERFOLDER">
+			<Component Id="cmp73adadf1586a4831bd9c940e32804b72" Guid="{73adadf1-586a-4831-bd9c-940e32804b72}">
+				<File Id="file73adadf1586a4831bd9c940e32804b72" KeyPath="yes" Source="$(var.LuncherPublishDir)aurastrip-adapter.luncher.exe" />
+
+				<ServiceInstall
+                    Id="ServiceInstallerLuncher"
+                    Type="ownProcess"
+                    Name="AurastripAdapterLuncher"
+                    DisplayName="Aurastrip Adapter Luncher"
+                    Description="Luncher AurastripAdapter"
+                    Start="auto"
+                    ErrorControl="normal"
+                    Account="LocalSystem">
+					<util:ServiceConfig
+                        FirstFailureActionType="restart"
+                        SecondFailureActionType="restart"
+                        ThirdFailureActionType="restart"
+                        RestartServiceDelayInSeconds="5"
+                        ResetPeriodInDays="1" />
+				</ServiceInstall>
+
+				<ServiceControl
+                    Id="ServiceControlLuncher"
+                    Name="AurastripAdapterLuncher"
+					Start="install"
+                    Stop="both"
+                    Remove="uninstall"
+                    Wait="yes" />
+
+				<RegistryValue
+                    Root="HKLM"
+                    Key="SOFTWARE\AurastripAdapterLuncher"
+                    Name="ServiceInstalled"
+                    Type="integer"
+                    Value="1" />
+			</Component>
+			<Component Id="cmp7e4232c954f147abb5f1d3c6f2dc38a2" Guid="{7e4232c9-54f1-47ab-b5f1-d3c6f2dc38a2}">
+				<File Id="file7e4232c954f147abb5f1d3c6f2dc38a2" KeyPath="yes" Source="$(var.LuncherPublishDir)aspnetcorev2_inprocess.dll" />
+			</Component>
+			
+			<!--<Component Id="AurastripHandlerScript" Guid="{4175d0c4-507d-4f24-a1b2-a06a2bc852f0}">
+				<File Id="HandleAurastripCmd"
+					  Source="Scripts\handle_aurastrip.bat"
+					  KeyPath="yes" />
+			</Component>-->
+		</DirectoryRef>
+	</Fragment>
+
+	<Fragment>
+		<ComponentGroup Id="ProductComponents">
+			<ComponentRef Id="cmp17cb0e566884a34b2d1aaddc34b3b3f" />
+			<ComponentRef Id="cmp75ce5038459945358ca1f68e624921c3" />
+			<ComponentRef Id="cmp904ed6c61a31422ebf2aeaba40385f59" />
+			<ComponentRef Id="cmp73adadf1586a4831bd9c940e32804b72" />
+			<ComponentRef Id="cmp7e4232c954f147abb5f1d3c6f2dc38a2" />
+			<!--<ComponentRef Id="AurastripHandlerScript" />-->
+		</ComponentGroup>
+	</Fragment>
+</Wix>

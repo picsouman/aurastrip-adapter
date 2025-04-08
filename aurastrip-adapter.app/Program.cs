@@ -9,8 +9,10 @@ using aurastrip_adapter.Repositories.Strip;
 using aurastrip_adapter.Services;
 using aurastrip_adapter.Services.Repositories.Configuration;
 using aurastrip_adapter.WebSockets;
-using MediatR;
 using Microsoft.EntityFrameworkCore;
+
+
+Directory.SetCurrentDirectory(AppDomain.CurrentDomain.BaseDirectory);
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -58,6 +60,10 @@ builder.Services.AddScoped<IColumnRepository, LocalColumnRepository>();
 builder.Services.AddScoped<ISlotRepository, LocalSlotRepository>();
 builder.Services.AddScoped<IStripRepository, LocalStripRepository>();
 
+// Windows Hosted Services
+builder.Services.AddWindowsService();
+builder.Services.AddHostedService<WebSocketRelayHostedService>();
+
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
@@ -71,9 +77,6 @@ using (var scope = app.Services.CreateScope())
         db.ExecuteSqlRaw("DELETE FROM __EFMigrationsLock;");
     }
     dbContext.Database.Migrate();
-    
-    var relayService = scope.ServiceProvider.GetRequiredService<WebSocketRelayHostedService>();
-    await relayService.StartAsync(CancellationToken.None);
 }
 
 // Configure the HTTP request pipeline.
