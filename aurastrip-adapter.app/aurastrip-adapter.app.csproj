@@ -5,7 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>aurastrip_adapter</RootNamespace>
-    <AssemblyVersion>1.1.5.2</AssemblyVersion>
+    <AssemblyVersion>1.1.7.4</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>

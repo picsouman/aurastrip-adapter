@@ -1,6 +1,7 @@
 using System.Data.SqlTypes;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using System.ServiceProcess;
 
 namespace aurastripadapter.luncher
@@ -18,13 +19,22 @@ namespace aurastripadapter.luncher
                 options.ListenLocalhost(6971);
             });
 
+            builder.Services.AddCors(setup =>
+            {
+                setup.AddDefaultPolicy(policy =>
+                {
+                    policy.AllowAnyHeader();
+                    policy.AllowAnyOrigin();
+                    policy.AllowAnyMethod();
+                });
+            });
+
             // Add services to the container.
             builder.Services.AddAuthorization();
             builder.Services.AddWindowsService();
 
             var app = builder.Build();
-
-            // Configure the HTTP request pipeline.
+            app.UseCors();
 
             app.MapGet("/start", () =>
             {
@@ -62,7 +72,7 @@ namespace aurastripadapter.luncher
                 }
             });
 
-            app.MapGet("/restart", () =>
+            app.MapGet("/restart", async () =>
             {
                 try
                 {
@@ -74,6 +84,7 @@ namespace aurastripadapter.luncher
                     else
                     {
                         StopLinuxService(ServiceName);
+                        await Task.Delay(2000);
                         StartLinuxService(ServiceName);
                     }
                 }
@@ -85,7 +96,7 @@ namespace aurastripadapter.luncher
             app.Run();
         }
 
-
+        [SupportedOSPlatform("windows")]
         static void StartWindowsService(string serviceName)
         {
             using var sc = new ServiceController(serviceName);
@@ -97,9 +108,11 @@ namespace aurastripadapter.luncher
             if (sc.Status == ServiceControllerStatus.Stopped)
             {
                 sc.Start();
+                sc.WaitForStatus(ServiceControllerStatus.Running, TimeSpan.FromSeconds(5));
             }
         }
 
+        [SupportedOSPlatform("windows")]
         static void StopWindowsService(string serviceName)
         {
             using var sc = new ServiceController(serviceName);
@@ -111,6 +124,7 @@ namespace aurastripadapter.luncher
             if (sc.Status == ServiceControllerStatus.Running)
             {
                 sc.Stop();
+                sc.WaitForStatus(ServiceControllerStatus.Stopped, TimeSpan.FromSeconds(2));
             }
         }
 
