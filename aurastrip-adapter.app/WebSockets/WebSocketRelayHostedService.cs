@@ -6,7 +6,6 @@ using aurastrip_adapter.WebSockets.Commands;
 using aurastrip_adapter.WebSockets.Dtos;
 using Fleck;
 using MediatR;
-using Console = System.Console;
 
 namespace aurastrip_adapter.WebSockets;
 
@@ -15,21 +14,23 @@ public class WebSocketRelayHostedService : IHostedService
     private readonly WebSocketServer _server;
     private readonly IMediator _mediator;
     private readonly JsonSerializerOptions _jsonOptions;
+    private readonly ILogger _logger;
     private IWebSocketConnection? _currentConnection = null;
     private CancellationTokenSource _cancellationTokenSourceForAutoSenders = new();
     private Version _buildVersion;
 
-    public WebSocketRelayHostedService(IMediator mediator, JsonSerializerOptions jsonOptions)
+    public WebSocketRelayHostedService(IMediator mediator, JsonSerializerOptions jsonOptions, ILogger<WebSocketRelayHostedService> logger)
     {
         _mediator = mediator;
         _jsonOptions = jsonOptions;
         _buildVersion = Assembly.GetExecutingAssembly().GetName().Version ?? throw new VersionNotFoundException("No version");
         _server = new WebSocketServer("ws://0.0.0.0:6969");
+        _logger = logger;
     }
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
-        Console.WriteLine("[WS] Starting server");
+        _logger.LogInformation("[WS] Starting server");
         _server.Start(socket =>
         {
             socket.OnOpen = () => OnOpenHandler(socket);
@@ -54,13 +55,15 @@ public class WebSocketRelayHostedService : IHostedService
             return;
         }
 
-        Console.WriteLine($"[WS] Client connected with ip {socket.ConnectionInfo.ClientIpAddress} at {DateTime.Now:HH:mm:ss}");
+        _logger.LogInformation("[WS] Client disconnected with ip {0} at {1}", socket.ConnectionInfo.ClientIpAddress, DateTime.Now.ToString("HH:mm:ss"));
         
         _currentConnection = socket;
         _cancellationTokenSourceForAutoSenders = new CancellationTokenSource();
-        StartAutomaticControllerDataSender(_cancellationTokenSourceForAutoSenders.Token);
-        StartAutomaticPositionDataSender(_cancellationTokenSourceForAutoSenders.Token);
-        StartAutomaticFlightPlanDataSender(_cancellationTokenSourceForAutoSenders.Token);
+
+        // TODO : convertir en background task
+        _ = StartAutomaticControllerDataSender(_cancellationTokenSourceForAutoSenders.Token);
+        _ = StartAutomaticPositionDataSender(_cancellationTokenSourceForAutoSenders.Token);
+        _ = StartAutomaticFlightPlanDataSender(_cancellationTokenSourceForAutoSenders.Token);
         socket.OnMessage = (data) => OnMessageHandler(socket, data).GetAwaiter().GetResult();
     }
 
@@ -74,7 +77,7 @@ public class WebSocketRelayHostedService : IHostedService
     
     private void OnErrorHandler(IWebSocketConnection socket, Exception e)
     {
-        Console.WriteLine($"WebSocket Error : {e.Message}");
+        _logger.LogError("WebSocket Error : {0}", e.Message);
         if (_currentConnection == socket)
         {
             CloseCurrentConnexion();
@@ -88,7 +91,8 @@ public class WebSocketRelayHostedService : IHostedService
 
         try
         {
-            Console.WriteLine($"[WS] Received request at {DateTime.Now:HH:mm:ss}: {request.Method}, Data : {data}");
+            _logger.LogInformation("[WS] Received request at {0}: {1}, Data : {2}", DateTime.Now.ToString("HH:mm:ss"), request.Method, data);
+            
             CancellationTokenSource timeoutCancellationTokenSource = new(TimeSpan.FromSeconds(2));
             response = new WebSocketResponse(
                 RequestId: request.RequestId,
@@ -97,9 +101,12 @@ public class WebSocketRelayHostedService : IHostedService
                 {
                     "GETALL_POS" => await _mediator.Send(new GetAllPositionCommand(), timeoutCancellationTokenSource.Token),
                     "GETALL_FP" => await _mediator.Send(new GetAllFlightPlanCommand(), timeoutCancellationTokenSource.Token),
-                    "ASSUME" => await _mediator.Send(new AssumeCommand(request.Data.ToString() ?? string.Empty), timeoutCancellationTokenSource.Token),
+                    "ASSUME" => await _mediator.Send(request.GetData<AssumeCommand>(_jsonOptions), timeoutCancellationTokenSource.Token),
                     "RELEASE" => await _mediator.Send(new ReleaseCommand(request.Data.ToString() ?? string.Empty), timeoutCancellationTokenSource.Token),
-                    "TRANSFERT" => await _mediator.Send(request.GetData<TransfertCommand>(_jsonOptions), timeoutCancellationTokenSource.Token),
+                    "TRANSFERT_SEND" => await _mediator.Send(request.GetData<TransfertSendCommand>(_jsonOptions), timeoutCancellationTokenSource.Token),
+                    "TRANSFERT_REJECT" => await _mediator.Send(new TransfertRejectCommand(request.Data.ToString() ?? string.Empty), timeoutCancellationTokenSource.Token),
+                    "TRANSFERT_CANCEL" => await _mediator.Send(new TransfertCancelCommand(request.Data.ToString() ?? string.Empty), timeoutCancellationTokenSource.Token),
+                    "TRANSFERT_ACCEPT" => await _mediator.Send(new TransfertAcceptCommand(request.Data.ToString() ?? string.Empty), timeoutCancellationTokenSource.Token),
                     "SET_TRAFFIC" => await _mediator.Send(request.GetData<SetTrafficCommand>(_jsonOptions), timeoutCancellationTokenSource.Token),
                     _ => throw new CommandUnknownException()
                 }
@@ -127,11 +134,11 @@ public class WebSocketRelayHostedService : IHostedService
 
     private void CloseCurrentConnexion()
     {
-        Console.WriteLine($"[WS] Client disconnected with ip {_currentConnection.ConnectionInfo.ClientIpAddress} at {DateTime.Now:HH:mm:ss}");
+        _logger.LogInformation("[WS] Client disconnected with ip {0} at {1}", _currentConnection?.ConnectionInfo.ClientIpAddress, DateTime.Now.ToString("HH:mm:ss"));
         _cancellationTokenSourceForAutoSenders.Cancel();
         try
         {
-            _currentConnection.Close();
+            _currentConnection?.Close();
         } catch(Exception) {}
         _currentConnection = null;
     }

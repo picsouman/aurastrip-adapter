@@ -3,18 +3,18 @@ using MediatR;
 
 namespace aurastrip_adapter.WebSockets.Commands
 {
-    public record TransfertCommand(string Callsign, string PositionName) : IRequest<bool>;
+    public record TransfertSendCommand(string Callsign, string PositionName) : IRequest<bool>;
 
-    public class TransfertCommandHandler : IRequestHandler<TransfertCommand, bool>
+    public class TransfertSendCommandHandler : IRequestHandler<TransfertSendCommand, bool>
     {
         private readonly AuroraService auroraService;
 
-        public TransfertCommandHandler(AuroraService auroraService)
+        public TransfertSendCommandHandler(AuroraService auroraService)
         {
             this.auroraService = auroraService;
         }
 
-        public async Task<bool> Handle(TransfertCommand request, CancellationToken cancellationToken)
+        public async Task<bool> Handle(TransfertSendCommand request, CancellationToken cancellationToken)
         {
             return await auroraService.ExecuteTransaction(async (auroraTcp) =>
             {

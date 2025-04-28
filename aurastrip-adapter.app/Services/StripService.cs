@@ -45,7 +45,6 @@ namespace aurastrip_adapter.Services
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
                 return new Strip();
             }
         }
