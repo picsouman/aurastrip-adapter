@@ -15,6 +15,7 @@ namespace aurastrip_adapter.Models
         public string Gate { get; set; } = string.Empty;
         public bool ClearedPush { get; set; } = false;
         public bool ClearedStart { get; set; } = false;
+        public int ClearedSSR { get; set; }
         public int RunwayClearance { get; set; }
     }
 }
